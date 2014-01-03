@@ -1,0 +1,16 @@
+Change log:
+
+1.1.0:
+   -General:
+     *Updated code for latest modCore version.
+  
+  -Added commands:
+     */setlocation <object> <location> - Sets the specified objects positon. Format of position: x,y,z (no spaces).
+     */getlocation <object> - Prints to location of the spedified object.
+     */addtestcube [amount] - A test command for the mesh importer.
+     
+  -bux fixes:
+     *Fixed /listcomponents command.
+     
+1.0.0:
+  -initial release.
