@@ -42,6 +42,52 @@ namespace PluginUtils
 
                 switch (args[0].ToLower())
                 {
+                    case "/addtestcube":
+                        #region
+                        GameObject player = GameObject.Find("Character");
+                        if (Application.loadedLevel == 2 && player != null)
+                        {
+                            Mesh mesh = null;
+                            if (modCore.importedMeshes.ContainsKey("testCube"))
+                                mesh = modCore.importedMeshes["testCube"];
+                            if (mesh != null)
+                            {
+                                try
+                                {
+                                    int numToSpawn = 1;
+                                    if (args.Length == 2)
+                                    {
+                                        numToSpawn = Convert.ToInt32(args[1]);
+                                    }
+                                    for (int i = 0; i < numToSpawn; i++)
+                                    {
+                                        GameObject testCube = new GameObject("testCube" + 1);
+                                        MeshFilter meshfilter = testCube.AddComponent<MeshFilter>();
+                                        meshfilter.mesh = mesh;
+                                        testCube.AddComponent<MeshRenderer>();
+                                        testCube.AddComponent<BoxCollider>();
+                                        testCube.AddComponent<Rigidbody>();
+                                        testCube.rigidbody.mass *= 4;
+                                        testCube.renderer.material.color = Color.gray;
+                                        Vector3 position = new Vector3(player.transform.position.x + 5, player.transform.position.y + 5, player.transform.position.z + i + 0.5f);
+                                        testCube.transform.position = position;
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    PrintError(e.Message);
+                                    modCore.LogError(e);
+                                }
+                            }
+                            else
+                                PrintError("model failed to load.");
+                        }
+                        else
+                            PrintWarning("Command can not be used outside of game.");
+                        received = true;
+                        break;
+                        #endregion
+
                     case "/loadedlevel":
                         Print("Level: " + Application.loadedLevel + ", " + Application.loadedLevelName);
                         received = true;
@@ -325,6 +371,57 @@ namespace PluginUtils
                         break;
                         #endregion
 
+                    case "/setlocation":
+                        #region set location
+                        if (args.Length > 1)
+                        {
+                            if (args.Length == 3)
+                            {
+                                try
+                                {
+                                    string[] parts = args[1].Split('.');
+                                    string objName = string.Empty;
+                                    foreach (string part in parts)
+                                    {
+                                        objName += " " + part;
+                                    }
+
+                                    objName = objName.Trim();
+
+
+                                    Vector3 newPos = new Vector3();
+                                    string[] locationParts = args[2].Split(',');
+                                    newPos.x = (float)Convert.ToDouble(locationParts[0]);
+                                    newPos.y = (float)Convert.ToDouble(locationParts[1]);
+                                    newPos.z = (float)Convert.ToDouble(locationParts[2]);
+
+                                    GameObject locationObject = GameObject.Find(objName);
+                                    if (locationObject != null)
+                                    {
+                                        locationObject.transform.position = newPos;
+                                    }
+                                    else
+                                        PrintError(objName + " doesn't exist.");
+                                }
+                                catch (Exception e)
+                                {
+                                    PrintError(e.Message);
+                                    modCore.LogError(e);
+                                }
+                            }
+                            else if (args.Length > 3)
+                                PrintError("Invalid number of arguments.");
+                            else if (args.Length == 2)
+                                PrintError("Must specify a location.");
+                            else
+                                PrintError("Unknown error.");
+                        }
+                        else
+                            PrintError("Must specify an object.");
+                        received = true;
+                        break;
+                        #endregion
+
                     case "/teleport":
                         #region teleport
                         utilMonitor.teleportEnabled = !utilMonitor.teleportEnabled;
@@ -332,6 +429,33 @@ namespace PluginUtils
                             Print("Teleportation enabled.");
                         else
                             Print("Teleportation disabled.");
+                        received = true;
+                        break;
+                        #endregion
+
+                    case "/getlocation":
+                        #region get location
+                        if (args.Length == 2)
+                        {
+                            string[] parts = args[1].Split('.');
+                            string objName = string.Empty;
+                            foreach (string part in parts)
+                            {
+                                objName += " " + part;
+                            }
+
+                            objName = objName.Trim();
+
+                            GameObject locationObject = GameObject.Find(objName);
+                            if (locationObject != null)
+                            {
+                                Print(locationObject.name + "'s location: " + locationObject.transform.position);
+                            }
+                            else
+                                PrintError(objName + " doesn't exist.");
+                        }
+                        else
+                            PrintError("Must specify an object.");
                         received = true;
                         break;
                         #endregion
@@ -344,13 +468,15 @@ namespace PluginUtils
         private void addCommands()
         {
             List<CommandDescription> commands = new List<CommandDescription>();
+            commands.Add(new CommandDescription("addtestcube", "[amount]", "Adds test cubes from model folder."));
             commands.Add(new CommandDescription("loadedlevel", string.Empty, "Prints the current loaded level"));
             commands.Add(new CommandDescription("printparent", "<object>", "prints parent of object"));
             commands.Add(new CommandDescription("listchildren", "<object>", "prints children of object"));
             commands.Add(new CommandDescription("listcomponents", "<object>", "list all components of object"));
             commands.Add(new CommandDescription("listgameobjects", "[-c]",  "Lists all game objects", "Lists all game objects. If optional argument -c is give, the components of the object will be listed along with it and the text will be printed to the game log instead of the console"));
             commands.Add(new CommandDescription("listusingobjects", "<component>", "Lists every object useing the specified component."));
-            commands.Add(new CommandDescription("location", "<object>", "Prints object location"));
+            commands.Add(new CommandDescription("getlocation", "<object>", "Prints object location"));
+            commands.Add(new CommandDescription("setlocation", "<object> <postions>", "sets the position of object", "Sets the specified objects positon. Format of position: x,y,z (no spaces)."));
             commands.Add(new CommandDescription("selector", string.Empty, "Toggles the item selector.", "When enabled, the item selector will list to the console any object you click on, including the objects behind it. List format: <object name>; <distance from player>; <global position>"));
             commands.Add(new CommandDescription("spawn", "<item>|[-list] [amount]", "Spawns mobs and crates", "Spawns the item <item>. Replace <item> with -list for a list of available items. There is an optional 3rd argument for the amount of an item to spawn"));
             commands.Add(new CommandDescription("teleport", string.Empty, "Toggles player teleportation", "If enabled, it will spawn the player at the location the player is looking at or mousing over."));

@@ -6,3 +6,11 @@ E:\Documents\Visual Studio 2010\Projects\StarforgePlugins\StarForgeTestPlugin\St
 E:\Documents\Visual Studio 2010\Projects\StarforgePlugins\StarForgeTestPlugin\StarForgeTestPlugin\bin\Debug\PluginUtils.pdb
 E:\Documents\Visual Studio 2010\Projects\StarforgePlugins\StarForgeTestPlugin\StarForgeTestPlugin\obj\Debug\PluginUtils.dll
 E:\Documents\Visual Studio 2010\Projects\StarforgePlugins\StarForgeTestPlugin\StarForgeTestPlugin\obj\Debug\PluginUtils.pdb
+E:\Documents\Visual Studio 2010\Projects\StarforgePlugins\pluginUtils\StarForgeTestPlugin\bin\Debug\PluginUtils.dll
+E:\Documents\Visual Studio 2010\Projects\StarforgePlugins\pluginUtils\StarForgeTestPlugin\bin\Debug\PluginUtils.pdb
+E:\Documents\Visual Studio 2010\Projects\StarforgePlugins\pluginUtils\StarForgeTestPlugin\bin\Debug\Assembly-CSharp.dll
+E:\Documents\Visual Studio 2010\Projects\StarforgePlugins\pluginUtils\StarForgeTestPlugin\bin\Debug\modCore.dll
+E:\Documents\Visual Studio 2010\Projects\StarforgePlugins\pluginUtils\StarForgeTestPlugin\bin\Debug\UnityEngine.dll
+E:\Documents\Visual Studio 2010\Projects\StarforgePlugins\pluginUtils\StarForgeTestPlugin\obj\Debug\PluginUtils.csprojResolveAssemblyReference.cache
+E:\Documents\Visual Studio 2010\Projects\StarforgePlugins\pluginUtils\StarForgeTestPlugin\obj\Debug\PluginUtils.dll
+E:\Documents\Visual Studio 2010\Projects\StarforgePlugins\pluginUtils\StarForgeTestPlugin\obj\Debug\PluginUtils.pdb
