@@ -35,7 +35,6 @@ namespace PluginUtils
 
         public bool Submit(string message)
         {
-            bool received = false;
             if (message.StartsWith("/"))
             {
                 string[] args = message.Split(' ');
@@ -48,8 +47,7 @@ namespace PluginUtils
                         if (Application.loadedLevel == 2 && player != null)
                         {
                             Mesh mesh = null;
-                            if (modCore.importedMeshes.ContainsKey("testCube"))
-                                mesh = modCore.importedMeshes["testCube"];
+                            mesh = modCore.GetMesh("testCube");
                             if (mesh != null)
                             {
                                 try
@@ -84,13 +82,11 @@ namespace PluginUtils
                         }
                         else
                             PrintWarning("Command can not be used outside of game.");
-                        received = true;
                         break;
                         #endregion
 
                     case "/loadedlevel":
                         Print("Level: " + Application.loadedLevel + ", " + Application.loadedLevelName);
-                        received = true;
                         break;
 
                     case "/printparent":
@@ -122,7 +118,6 @@ namespace PluginUtils
                         }
                         else
                             PrintError("invalid number of args1");
-                        received = true;
                         break;
                         #endregion
 
@@ -133,7 +128,6 @@ namespace PluginUtils
                             Print("Location of " + obj.name + ": " + obj.transform.position.ToString());
                         else
                             modCore.PrintError(obj.name + " not found.");
-                        received = true;
                         break;
                         #endregion
 
@@ -164,7 +158,6 @@ namespace PluginUtils
                         }
                         else
                             PrintError("invalid number of args1");
-                        received = true;
                         break;
                     #endregion
 
@@ -192,7 +185,6 @@ namespace PluginUtils
                         {
                             PrintError("please specify a component.");
                         }
-                        received = true;
                         break;
                         #endregion
 
@@ -222,7 +214,7 @@ namespace PluginUtils
                                 if (Obj != null)
                                 {
                                     Print("Components of " + Obj.name + ": ");
-                                    string[] components = GetAllComponents(args[1]);
+                                    string[] components = GetAllComponents(Obj);
                                     foreach (string comp in components)
                                     {
                                         Print("--" + comp);
@@ -241,7 +233,6 @@ namespace PluginUtils
                         {
                             PrintError("Please specify at least 1 object.");
                         }
-                        received = true;
                         break;
                         #endregion
 
@@ -282,7 +273,6 @@ namespace PluginUtils
                             modCore.LogError("GoList list is null.");
                             PrintError("GoList list is null.");
                         }
-                        received = true;
                         break;
                         #endregion
 
@@ -356,7 +346,6 @@ namespace PluginUtils
                         }
                         else
                             PrintError("Please specify an object to spawn.");
-                        received = true;
                         break;
                         #endregion
 
@@ -367,7 +356,6 @@ namespace PluginUtils
                             Print("Item selector enabled.");
                         else
                             Print("Item selector disabled.");
-                        received = true;
                         break;
                         #endregion
 
@@ -418,7 +406,6 @@ namespace PluginUtils
                         }
                         else
                             PrintError("Must specify an object.");
-                        received = true;
                         break;
                         #endregion
 
@@ -429,7 +416,6 @@ namespace PluginUtils
                             Print("Teleportation enabled.");
                         else
                             Print("Teleportation disabled.");
-                        received = true;
                         break;
                         #endregion
 
@@ -456,13 +442,12 @@ namespace PluginUtils
                         }
                         else
                             PrintError("Must specify an object.");
-                        received = true;
                         break;
                         #endregion
 
                 }
             }
-            return received;
+            return false;
         }
 
         private void addCommands()
@@ -487,11 +472,10 @@ namespace PluginUtils
         {
             if (Application.loadedLevel == 2)
             {
-                GameObject player = null;
-                DynamicSpawner[] spawners = GameObject.FindObjectsOfType<DynamicSpawner>();
-                if (spawners.Length > 0)
+                GameObject player = GameObject.Find("Character");
+                if (player == null)
                 {
-                    player = spawners[0].PlayerTransform.gameObject;
+                    PrintError("Failed to location player.");
                 }
                 return player;
             }
