@@ -14,3 +14,4 @@ E:\Documents\Visual Studio 2010\Projects\StarforgePlugins\pluginUtils\StarForgeT
 E:\Documents\Visual Studio 2010\Projects\StarforgePlugins\pluginUtils\StarForgeTestPlugin\obj\Debug\PluginUtils.csprojResolveAssemblyReference.cache
 E:\Documents\Visual Studio 2010\Projects\StarforgePlugins\pluginUtils\StarForgeTestPlugin\obj\Debug\PluginUtils.dll
 E:\Documents\Visual Studio 2010\Projects\StarforgePlugins\pluginUtils\StarForgeTestPlugin\obj\Debug\PluginUtils.pdb
+E:\Documents\Visual Studio 2010\Projects\StarforgePlugins\pluginUtils\StarForgeTestPlugin\bin\Debug\Assembly-CSharp-firstpass.dll

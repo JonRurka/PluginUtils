@@ -13,6 +13,7 @@ namespace PluginUtils
         ModCore modCore;
         UtilMonitor utilMonitor;
         Monitor monitor;
+        ModApi modApi;
 
 
         public string Name
@@ -25,12 +26,21 @@ namespace PluginUtils
 
         public void Init(ModCore core)
         {
-            modCore = core;
-            modCore.Log(Name + " started successfully!");
-            monitor = modCore.monitorComp;
-            utilMonitor = new GameObject("UtilMontior").AddComponent<UtilMonitor>();
-            utilMonitor.modCore = core;
-            addCommands();
+            if (core != null && core.API != null)
+            {
+                modCore = core;
+                modApi = core.API;
+                monitor = core.monitorComp;
+                utilMonitor = new GameObject("UtilMontior").AddComponent<UtilMonitor>();
+                utilMonitor.modCore = core;
+                utilMonitor.api = core.API;
+                addCommands();
+                modCore.Log(Name + " started successfully!");
+            }
+            else if (core == null)
+                Debug.Log("PluginUtils Error: modcore is null!");
+            else if (core.API == null)
+                Debug.Log("PluginUtils Error: API is null!");
         }
 
         public bool Submit(string message)
@@ -42,7 +52,7 @@ namespace PluginUtils
                 switch (args[0].ToLower())
                 {
                     case "/addtestcube":
-                        #region
+                        #region add test cube
                         GameObject player = GameObject.Find("Character");
                         if (Application.loadedLevel == 2 && player != null)
                         {
@@ -82,6 +92,26 @@ namespace PluginUtils
                         }
                         else
                             PrintWarning("Command can not be used outside of game.");
+                        break;
+                        #endregion
+
+                    case "/debuginfo":
+                        #region debuginfo
+                        utilMonitor.debugInfo = !utilMonitor.debugInfo;
+                        if (utilMonitor.debugInfo)
+                            Print("Debug info enabled.");
+                        else
+                            Print("Debug info disabled.");
+                        break;
+                        #endregion
+
+                    case "/dig":
+                        #region dig
+                        utilMonitor.digEnabled = !utilMonitor.digEnabled;
+                        if (utilMonitor.digEnabled)
+                            Print("Digging enabled.");
+                        else
+                            Print("Digging disabled.");
                         break;
                         #endregion
 
@@ -330,10 +360,15 @@ namespace PluginUtils
                                         Print(numToSpawn + " crate(s) spawned.");
                                         break;
 
+                                    case "truck":
+                                        utilMonitor.InstantiateTruck();
+                                        break;
+
                                     case "-list":
                                         Print("Available items:");
                                         Print("--leech");
                                         Print("--crate");
+                                        Print("--truck");
                                         break;
 
                                     default:
@@ -419,6 +454,39 @@ namespace PluginUtils
                         break;
                         #endregion
 
+                    case "/tp":
+                        #region tp
+                        if (args.Length == 2)
+                        {
+                            GameObject playerGO = modApi.GetNetworkPlayer();
+                            if (playerGO != null)
+                            {
+                                try
+                                {
+
+                                    Vector3 newPos = new Vector3();
+                                    string[] locationParts = args[1].Split(',');
+                                    newPos.x = (float)Convert.ToDouble(locationParts[0]);
+                                    newPos.y = (float)Convert.ToDouble(locationParts[1]);
+                                    newPos.z = (float)Convert.ToDouble(locationParts[2]);
+
+                                    playerGO.transform.position = newPos;
+                                    playerGO.rigidbody.velocity = Vector3.zero;
+                                }
+                                catch (Exception e)
+                                {
+                                    PrintError(e.Message);
+                                    modCore.LogError(e);
+                                }
+                            }
+                            else
+                                PrintError("Failed to located player.");
+                        }
+                        else
+                            PrintError("Please specify a location.");
+                        break;
+                        #endregion
+
                     case "/getlocation":
                         #region get location
                         if (args.Length == 2)
@@ -445,15 +513,54 @@ namespace PluginUtils
                         break;
                         #endregion
 
+                    case "/testminimap":
+                        testMinimapCam();
+                        break;
+
                 }
             }
             return false;
+        }
+
+        private void testMinimapCam()
+        {
+            GameObject minimap = GameObject.Find("MinimapCamera");
+            if (minimap != null)
+            {
+                minimap.SetActive(true);
+                Camera main = Camera.current;
+                Camera miniCam = minimap.GetComponent<Camera>();
+                minimap.AddComponent<CodeHatch.Minimap.MinimapCamera>();
+                //Camera.SetupCurrent(miniCam);
+                Print("main depth: " + main.depth);
+                Print("main pixelrect: " + main.pixelRect);
+                Print("main rect: " + main.rect);
+                Print("main clear flags: " + main.clearFlags.ToString());
+                Print("main Orthographic: " + main.isOrthoGraphic);
+                Print("-------------------------------------");
+                Print("miniCam depth: " + miniCam.depth);
+                Print("miniCam pixelrect: " + miniCam.pixelRect);
+                Print("miniCam rect: " + miniCam.rect);
+                Print("miniCam clear flags: " + miniCam.clearFlags.ToString());
+                Print("miniCam size:" + miniCam.orthographicSize);
+                Print("MiniCam Orthographic: " + miniCam.isOrthoGraphic);
+                //Print("minimap enabled.");
+            }
+            else
+                PrintError("Minimap camera not found.");
+        }
+
+        private void TestCallback()
+        {
+
         }
 
         private void addCommands()
         {
             List<CommandDescription> commands = new List<CommandDescription>();
             commands.Add(new CommandDescription("addtestcube", "[amount]", "Adds test cubes from model folder."));
+            commands.Add(new CommandDescription("debuginfo", string.Empty, "Toggles the debug info."));
+            commands.Add(new CommandDescription("dig", string.Empty, "Toggles digging.", "Toggles digging. When enabled, use left mouse button to dig and right to place"));
             commands.Add(new CommandDescription("loadedlevel", string.Empty, "Prints the current loaded level"));
             commands.Add(new CommandDescription("printparent", "<object>", "prints parent of object"));
             commands.Add(new CommandDescription("listchildren", "<object>", "prints children of object"));
@@ -465,6 +572,8 @@ namespace PluginUtils
             commands.Add(new CommandDescription("selector", string.Empty, "Toggles the item selector.", "When enabled, the item selector will list to the console any object you click on, including the objects behind it. List format: <object name>; <distance from player>; <global position>"));
             commands.Add(new CommandDescription("spawn", "<item>|[-list] [amount]", "Spawns mobs and crates", "Spawns the item <item>. Replace <item> with -list for a list of available items. There is an optional 3rd argument for the amount of an item to spawn"));
             commands.Add(new CommandDescription("teleport", string.Empty, "Toggles player teleportation", "If enabled, it will spawn the player at the location the player is looking at or mousing over."));
+            commands.Add(new CommandDescription("tp", "<position>", "teleports the player.", "Teleports the player to the specified position. Format of position: x,y,z (no spaces)."));
+            commands.Add(new CommandDescription("testminimap", string.Empty, "test minimap cam."));
             modCore.AddCommands(Name, commands);
         }
 
